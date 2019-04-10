@@ -158,3 +158,52 @@ In such case, you can omit the `hook_url` key in the logging config.
 .. _logging: https://docs.python.org/3/library/logging.html
 .. _incoming webhook integration: https://my.slack.com/services/new/incoming-webhook/
 .. _dictConfig: https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
+
+Proxy-server Support
+++++++++++++++++++++
+
+It's possible to use an external proxy-server. To do it just add proxy address as
+proxy_url argument in the SlackHandler:
+
+.. code-block:: python
+
+    h = SlackHandler(hook_url=URL, proxy_url=PROXY_URL)
+
+
+or via config:
+
+.. code-block:: python
+
+    DICT_CONFIG = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'filters': {
+            'slack_filter': {
+                '()': 'webhook_logger.slack.SlackLogFilter',
+            }
+        },
+        'handlers': {
+            'slack': {
+                'level': 'INFO',
+                'filters': ['slack_filter'],
+                'class': 'webhook_logger.slack.SlackHandler',
+                'hook_url': 'https://hooks.slack.com/services/XXXXXXXX/AAAAAAAAA/aaaaaaaaaaaa',
+                'proxy_url': 'proxy:3128',
+                'formatter': 'slack_format',
+            }
+        },
+        'formatters': {
+            'slack_format': {
+                '()': 'webhook_logger.slack.SlackFormatter',
+                'title': 'Your optional title'
+            },
+        },
+        'loggers': {
+            'my_logger': {
+                'handlers': ['slack'],
+                'level': 'DEBUG'
+            }
+        }
+    }
+
+

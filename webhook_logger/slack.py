@@ -14,9 +14,13 @@ except ImportError:
 class SlackHandler(logging.Handler):
     """Logging handler to post to Slack to the webhook URL"""
 
-    def __init__(self, hook_url=None, *args, **kwargs):
+    def __init__(self, hook_url=None, proxy_url=None, *args, **kwargs):
         super(SlackHandler, self).__init__(*args, **kwargs)
         self._hook_url = hook_url
+        self._proxies = {
+                'http': proxy_url,
+                'https': proxy_url,
+            } if proxy_url else {}
         self.formatter = SimpleSlackFormatter()
 
     @property
@@ -31,7 +35,7 @@ class SlackHandler(logging.Handler):
         """
         try:
             slack_data = self.format(record)
-            requests.post(self.hook_url, json=slack_data)
+            requests.post(self.hook_url, json=slack_data, proxies=self._proxies)
         except Exception:
             self.handleError(record)
 
